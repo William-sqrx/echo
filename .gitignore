@@ -1,0 +1,9 @@
+.DS_Store
+*.swp
+.env
+.env.*
+node_modules/
+.output/
+.nitro/
+.vite/
+dist/
