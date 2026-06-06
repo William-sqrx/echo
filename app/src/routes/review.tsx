@@ -1,10 +1,11 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   analyzeTranscript,
   type Suggestion,
   type SuggestionSeriousness,
 } from '#/api/analyze'
+import { sessionStore } from '#/store/session'
 
 export const Route = createFileRoute('/review')({
   component: ReviewPage,
@@ -26,21 +27,22 @@ function ReviewPage() {
   const [error, setError] = useState<string | null>(null)
   const [search, setSearch] = useState('')
   const [filter, setFilter] = useState<Filter>('all')
+  const fetchedRef = useRef(false)
 
   useEffect(() => {
-    const raw = sessionStorage.getItem('pendingSession')
-    if (!raw) {
+    if (fetchedRef.current) return
+    fetchedRef.current = true
+
+    const session = sessionStore.get()
+    if (!session) {
       setError('No session data found. Please record a conversation first.')
       setLoading(false)
       return
     }
 
-    const { topic: t, transcript } = JSON.parse(raw) as {
-      topic: string
-      transcript: string
-    }
+    const { topic: t, transcript } = session
+    sessionStore.clear()
     setTopic(t)
-    sessionStorage.removeItem('pendingSession')
 
     if (!transcript.trim()) {
       setError('No speech was captured in this session.')

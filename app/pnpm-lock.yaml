@@ -27,7 +27,7 @@ importers:
         specifier: ^1.132.0
         version: 1.168.14(@tanstack/react-router@1.170.11(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(vite@7.3.5(@types/node@22.19.19)(jiti@2.7.0)(lightningcss@1.32.0))
       nitro:
-        specifier: npm:nitro-nightly@latest
+        specifier: npm:nitro-nightly@4.0.0-20251010-091516-7cafddba
         version: nitro-nightly@4.0.0-20251010-091516-7cafddba(vite@7.3.5(@types/node@22.19.19)(jiti@2.7.0)(lightningcss@1.32.0))
       react:
         specifier: ^19.2.0

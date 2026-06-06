@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useRef, useState, type FormEvent } from 'react'
 import { useRealtimeSpeechMetrics } from '#/hooks/useRealtimeSpeechMetrics'
+import { sessionStore } from '#/store/session'
 
 export const Route = createFileRoute('/')({
   component: HomePage,
@@ -51,13 +52,10 @@ function HomePage() {
 
   function handleSubmitTopic(e: FormEvent) {
     e.preventDefault()
-    sessionStorage.setItem(
-      'pendingSession',
-      JSON.stringify({
-        topic: topic.trim() || 'Untitled session',
-        transcript: transcriptRef.current,
-      }),
-    )
+    sessionStore.set({
+      topic: topic.trim() || 'Untitled session',
+      transcript: transcriptRef.current,
+    })
     setShowModal(false)
     setTopic('')
     void navigate({ to: '/review' })
