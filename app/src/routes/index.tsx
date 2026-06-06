@@ -1,4 +1,5 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { useRef, useState, type FormEvent } from 'react'
 import { useRealtimeSpeechMetrics } from '#/hooks/useRealtimeSpeechMetrics'
 
 export const Route = createFileRoute('/')({
@@ -34,8 +35,33 @@ function HomePage() {
     endConversation,
   } = useRealtimeSpeechMetrics()
 
+  const navigate = useNavigate()
+  const [showModal, setShowModal] = useState(false)
+  const [topic, setTopic] = useState('')
+  const transcriptRef = useRef('')
+
   const canStart = !connecting && !sessionActive
   const canEnd = connecting || sessionActive
+
+  function handleEndConversation() {
+    transcriptRef.current = sentences.map((s) => s.text).join(' ').trim()
+    endConversation()
+    setShowModal(true)
+  }
+
+  function handleSubmitTopic(e: FormEvent) {
+    e.preventDefault()
+    sessionStorage.setItem(
+      'pendingSession',
+      JSON.stringify({
+        topic: topic.trim() || 'Untitled session',
+        transcript: transcriptRef.current,
+      }),
+    )
+    setShowModal(false)
+    setTopic('')
+    void navigate({ to: '/review' })
+  }
 
   return (
     <main className="app-shell">
@@ -57,7 +83,7 @@ function HomePage() {
             type="button"
             className="secondary"
             disabled={!canEnd}
-            onClick={endConversation}
+            onClick={handleEndConversation}
           >
             End conversation
           </button>
@@ -151,6 +177,40 @@ function HomePage() {
           </div>
         )}
       </section>
+
+      {showModal && (
+        <div className="modal-overlay">
+          <div
+            className="modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="modal-title"
+          >
+            <h2 id="modal-title">Session ended</h2>
+            <p>What was this conversation about?</p>
+            <form onSubmit={handleSubmitTopic}>
+              <input
+                className="topic-input"
+                type="text"
+                placeholder="e.g. Meeting with friend, Sales pitch…"
+                value={topic}
+                onChange={(e) => setTopic(e.target.value)}
+                autoFocus
+              />
+              <div className="modal-actions">
+                <button type="submit">Analyze session →</button>
+                <button
+                  type="button"
+                  className="secondary"
+                  onClick={() => setShowModal(false)}
+                >
+                  Skip
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </main>
   )
 }
