@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { useEffect, useRef, useState } from 'react'
 import {
   analyzeTranscript,
@@ -6,6 +6,7 @@ import {
   type SuggestionSeriousness,
 } from '#/api/analyze'
 import { sessionStore } from '#/store/session'
+import { chatStore } from '#/store/chatSession'
 
 export const Route = createFileRoute('/review')({
   component: ReviewPage,
@@ -21,6 +22,7 @@ const ALL_LEVELS = ['all', 'inaccuracy', 'mistake', 'blunder'] as const
 type Filter = (typeof ALL_LEVELS)[number]
 
 function ReviewPage() {
+  const navigate = useNavigate()
   const [topic, setTopic] = useState('')
   const [suggestions, setSuggestions] = useState<Suggestion[]>([])
   const [loading, setLoading] = useState(true)
@@ -135,13 +137,18 @@ function ReviewPage() {
               {filtered.map((s) => (
                 <article
                   key={s.id}
-                  className={`suggestion-card suggestion-${s.seriousness}`}
+                  className={`suggestion-card suggestion-${s.seriousness} suggestion-card-clickable`}
+                  onClick={() => {
+                    chatStore.set(s)
+                    void navigate({ to: '/chat' })
+                  }}
                 >
                   <div className="suggestion-header">
                     <span className={`seriousness-badge badge-${s.seriousness}`}>
                       {SERIOUSNESS_LABEL[s.seriousness]}
                     </span>
                     <span className="issue-type">{s.issueType}</span>
+                    <span className="suggestion-cta">Practice →</span>
                   </div>
                   <p className="issue-description">{s.issueDescription}</p>
                 </article>
